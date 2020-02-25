@@ -1,0 +1,78 @@
+\documentclass[12pt,twoside]{article}
+\usepackage{jmlda}
+\title
+%    [Нелинейное ранжирование результатов разведочного информационного поиска] % Краткое название; не нужно, если полное название влезает в~колонтитул
+{Quality prediction of proteins models with spherical convolutions on three-dimensional graphs.}
+\author
+%    [Мамонов~К.\,Р.] % список авторов для колонтитула; не нужен, если основной список влезает в колонтитул
+{Nikita Pavlichenko, Sergei Grudinin, Ilia Igashov.} % основной список авторов, выводимый в оглавление
+%[Мамонов~К.\,Р.$^1$, Воронцов~К.\,В.$^1$, Еремеев~М.\,А.$^1$] % список авторов, выводимый в заголовок; не нужен, если он не отличается от основного
+%\thanks
+%    {Работа выполнена при финансовой поддержке РФФИ, проект \No\,00-00-00000.
+%   Научный руководитель:  Стрижов~В.\,В.
+%{Задачу поставил:  Воронцов~К.\,В.
+%	 Консультант:  Еремеев~М.\,А.}
+\email
+{pavlichenko.nv@phystech.ru, sergei.grudinin@inria.fr, igashov.i@yandex.ru}
+\organization
+{$^1$ Moscow Institute of Physics and Technolgy, Moscow, Russia}%; $^2$Организация}
+\abstract
+{Convolutional neural networks have become very popular in recent years, and, in particular, have found widespread application in computer vision. Recently, active work has also begun on graph convolutional networks. In general, the graphs, unlike the pictures, are irregular structures, and in many tasks of learning on graphs sample objects also do not have unified topology. Therefore, the existing operations of convolution on the graphs are very much simplified, and the task of pulling on the graphs remain open in general. The purpose of this work is to study new operations of convolution on three-dimensional graphs within the framework of solving the problem of quality estimation of three-dimensional models of proteins (the problem of regression on the graph nodes).
+	
+	\bigskip
+	\textbf{Key words}: \emph {graph convolutional networks, spherical convlutions, three-dimensional graphs learning}.}
+\titleEng
+{JMLDA paper example: file jmlda-example.tex}
+\authorEng
+{Author~F.\,S.$^1$, CoAuthor~F.\,S.$^2$, Name~F.\,S.$^2$}
+\organizationEng
+{$^1$Organization; $^2$Organization}
+\abstractEng
+{This document is an example of paper prepared with \LaTeXe\
+	typesetting system and style file \texttt{jmlda.sty}.
+	
+	\bigskip
+	\textbf{Keywords}: \emph{keyword, keyword, more keywords}.}
+\begin{document}
+	
+	\maketitle
+	
+	\section{Introduction}
+	Let's consider a 3D model of a protein in space. The protein represents a chain of amino acids rolled up in space. 
+	Through dividing space around a protein into cells (for example, by the Voronoi method), we can get a 3D-graph, the vertexes of which are amino acids of protein and edges are carried out between those amino acids that are in adjacent cells.
+	On these data we will solve a regression problem: to predict for each vertex $v_i$ a real number - its "score" (how correctly it is placed in the given 3D-model in comparison with by the actual conformation of this protein).
+	%\begin{State}
+	%    Мотивации и~интерпретации наиболее важны для понимания сути работы.
+	%\end{State}
+	
+	%\begin{Theorem}
+	%    Не~менее $90\%$ коллег, заинтересовавшихся Вашей статьёй,
+	%    прочитают в~ней не~более~$10\%$ текста.
+	%\end{Theorem}
+	%
+	%\begin{Proof}
+	%    Причём это будут именно те~разделы, которые не содержат формул.
+	%\end{Proof}
+	%
+	%\begin{Remark}
+	%    Выше показано применение окружений
+	%    Def, Theorem, State, Remark, Proof.
+	%\end{Remark}
+	
+	
+	%\section{Заключение}
+	
+	%Желательно, чтобы этот раздел был, причём он не~должен дословно повторять аннотацию.
+	%Обычно здесь отмечают,
+	%каких результатов удалось добиться,
+	%какие проблемы остались открытыми.
+	
+	
+	\bibliographystyle{plain}
+	\bibliography{Pavlichenko2020Project52}
+	
+	% Решение Программного Комитета:
+	%\ACCEPTNOTE
+	%\AMENDNOTE
+	%\REJECTNOTE
+\end{document}
