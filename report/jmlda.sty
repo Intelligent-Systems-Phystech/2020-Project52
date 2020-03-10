@@ -700,7 +700,8 @@
 % Переопределение горизонтальных и вертикальных промежутков в списке литературы
 \renewenvironment{thebibliography}[1]
   {
-  \def\bibname{\ruseng{Литeратура}{References}}
+  %\def\bibname{\ruseng{Литeратура}{References}}
+  \def\bibname{\ruseng{References}{References}}
   \bibsection{\bibname}%
     \list{\@biblabel{\@arabic\c@enumiv}}{%
       \settowidth\labelwidth{\@biblabel{#1}}%

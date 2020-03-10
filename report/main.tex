@@ -22,11 +22,11 @@
 	\bigskip
 	\textbf{Key words}: \emph {graph convolutional networks, spherical convlutions, three-dimensional graphs learning}.}
 \titleEng
-{JMLDA paper example: file jmlda-example.tex}
+{Quality prediction of proteins models with spherical convolutions on three-dimensional graphs}
 \authorEng
 {Author~F.\,S.$^1$, CoAuthor~F.\,S.$^2$, Name~F.\,S.$^2$}
 \organizationEng
-{$^1$Organization; $^2$Organization}
+{$^1$Moscow Institute of Physics and Technolgy, Moscow, Russia;}
 \abstractEng
 {This document is an example of paper prepared with \LaTeXe\
 	typesetting system and style file \texttt{jmlda.sty}.
@@ -38,9 +38,45 @@
 	\maketitle
 	
 	\section{Introduction}
-	Let's consider a 3D model of a protein in space. The protein represents a chain of amino acids rolled up in space. 
-	Through dividing space around a protein into cells (for example, by the Voronoi method), we can get a 3D-graph, the vertexes of which are amino acids of protein and edges are carried out between those amino acids that are in adjacent cells.
-	On these data we will solve a regression problem: to predict for each vertex $v_i$ a real number - its "score" (how correctly it is placed in the given 3D-model in comparison with by the actual conformation of this protein).
+	Protein molecules are an important part of any biological form. They determine cellular 
+	functions and behavior of various biological and chemical structures. It makes the discovery 
+	and prediction of proteins structure one of the most important points of medical, chemical 
+	and genetic science researches.
+
+	Molecules of proteins consist of smaller molecules called amino acids. These amino acids
+	form a chain that is folded and placed in space. Thus, protein functions are determined
+	by their positions in a 3D space. So, having this chain of amino acids we need to identify
+	how they are located. There are ways to do this experimentally, but it can be time-consuming,
+	expensive and not always possible. To solve these disadvantages, computational algorithms \cite{Arnold2005}\cite{Lundstroem2008}\cite{Xu2019}
+	were developed that generate different chain foldings. The problem is that no algorithm is the 
+	best one. Some of proteins are better modeled by one algorithm, others by others. Therefore, we 
+	are facing the problem of quality assessment (QA) of these protein models.
+
+	This problem has recently got attention from the machine learning community. Various artificial
+	intelligence methods were applied such as neural networks \cite{Wallner2003} and support vector machines \cite{Ray2012}\cite{Uziela2016}.
+	More recent approaches mostly include deep learning methods \cite{Hurtado2018}\cite{Derevyanko2018}\cite{Pages2019}\cite{Conover2019}. The newest approach is to use graph
+	machine learning methods such as Graph Convolutional Networks (GCN) \cite{Baldassarre2020GRAPHQAPM}, where the protein is in some
+	way represented as a graph. This work brings the new idea of capturing the 3D structure of this graph 
+	to improve the quality of GCN.
+
+
+
+	\section{Problem statement}
+	Consider a 3D model of a protein in space. The protein represents a chain of amino acids rolled up in space. 
+	Through dividing space around a protein into cells, for example, by the Voronoi method, we can get a
+	3D-graph, the vertexes of which are amino acids of protein and edges are carried out between those amino
+	acids that are in adjacent cells. Denote the resulting graph by $G = (V, E)$, where verticles $V = (v_1, \ldots, v_n)$
+	are a set of amino acids, $E$ are edges. For the $i$-th vertex we denote for $\mathcal{N}(v_i)$ the
+	set of its neighbors in a graph $G$ and for $G$ an adjacency matrix $\boldsymbol{A}$:
+	$$A_{ij} = \begin{cases}
+		1, & (v_i, v_j) \in E \\
+		0, & \text{otherwise}
+	\end{cases}.$$ 
+	Consider that each vertex $v_i$ is described by some real $d$-dimensional vector of attributes 
+	$x(v_i) = \boldsymbol{x}_i$. In the simplest case, it can be a one-hot representation of an amino acid type.
+	Using these data we will solve a regression problem: to predict for each vertex $v_i$ a real number - its
+	"score". In other words, how correctly it is placed in the given 3D-model in comparison with the 
+	actual conformation of this protein.
 	%\begin{State}
 	%    Мотивации и~интерпретации наиболее важны для понимания сути работы.
 	%\end{State}
