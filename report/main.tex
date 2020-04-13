@@ -2,7 +2,7 @@
 \usepackage{jmlda}
 \title
 %    [Нелинейное ранжирование результатов разведочного информационного поиска] % Краткое название; не нужно, если полное название влезает в~колонтитул
-{Quality prediction of proteins models with spherical convolutions on three-dimensional graphs.}
+{Quality prediction of proteins models with spherical convolutions on three-dimensional graphs}
 \author
 %    [Мамонов~К.\,Р.] % список авторов для колонтитула; не нужен, если основной список влезает в колонтитул
 {Nikita Pavlichenko, Sergei Grudinin, Ilia Igashov.} % основной список авторов, выводимый в оглавление
@@ -57,26 +57,81 @@
 	More recent approaches mostly include deep learning methods \cite{Hurtado2018}\cite{Derevyanko2018}\cite{Pages2019}\cite{Conover2019}. The newest approach is to use graph
 	machine learning methods such as Graph Convolutional Networks (GCN) \cite{Baldassarre2020GRAPHQAPM}, where the protein is in some
 	way represented as a graph. This work brings the new idea of capturing the 3D structure of this graph 
-	to improve the quality of GCN.
-
+	to improve the quality of GCN using convlutions based on spherical harmonics.
 
 
 	\section{Problem statement}
 	Consider a 3D model of a protein in space. The protein represents a chain of amino acids rolled up in space. 
 	Through dividing space around a protein into cells, for example, by the Voronoi method, we can get a
-	3D-graph, the vertexes of which are amino acids of protein and edges are carried out between those amino
+	3D-graph, the vertices of which are amino acids of protein and edges are carried out between those amino
 	acids that are in adjacent cells. Denote the resulting graph by $G = (V, E)$, where verticles $V = (v_1, \ldots, v_n)$
 	are a set of amino acids, $E$ are edges. For the $i$-th vertex we denote for $\mathcal{N}(v_i)$ the
 	set of its neighbors in a graph $G$ and for $G$ an adjacency matrix $\boldsymbol{A}$:
 	$$A_{ij} = \begin{cases}
 		1, & (v_i, v_j) \in E \\
-		0, & \text{otherwise}
-	\end{cases}.$$ 
+		0, & \text{otherwise}.
+	\end{cases}$$ 
+
 	Consider that each vertex $v_i$ is described by some real $d$-dimensional vector of attributes 
 	$x(v_i) = \boldsymbol{x}_i$. In the simplest case, it can be a one-hot representation of an amino acid type.
+	We can form feature matrix $\boldsymbol{X}$ from vectors $x(v_i)$ for every vertex $x_i$.
 	Using these data we will solve a regression problem: to predict for each vertex $v_i$ a real number - its
 	"score". In other words, how correctly it is placed in the given 3D-model in comparison with the 
 	actual conformation of this protein.
+
+	\section{Graph Convolutional Networks}
+	We will develop approach for machine learning on graphs using Graph Convolutional Network (GCN) \cite{Kipf2016}.
+	The idea of this approach is aggregation of neighbors features for every vertex and forming new feature vectors on the
+	layer's output. So, for GCN with $L$ layers, $L \geqslant 2$ we have:
+	$$A_{ij} = \begin{cases}
+		\boldsymbol{H}^{(0)} = \boldsymbol{X} \\
+		\boldsymbol{H}^{(l)} = \sigma\left(\boldsymbol{A} \boldsymbol{H}^{l-1}\boldsymbol{W}^{(l-1)}\right) & \text{for } l \in \{1, \ldots, L - 1\} \\
+		\boldsymbol{H}^{(L)} =  \boldsymbol{A} \boldsymbol{H}^{L-1}\boldsymbol{W}^{(L-1)}.
+	\end{cases}$$
+	In the above $\boldsymbol{H}^{(l)}$ denotes feature matrix at $l$-th layer and $\boldsymbol{W}^{(l)}$ denotes weight matrix. Common choise for activation
+	function $\sigma$ is a ReLU activation: $\text{ReLU}(x) := \max(x, 0)$ or an ELU activation: $\text{ELU}(x) := \begin{cases}
+		x, & x \geqslant 0 \\
+		\alpha(e^x - 1), & x < 0
+	\end{cases}$.
+	Wheights matrix $\boldsymbol{W}^{(l)}$ are trained by stochastic gradient descend or its modifications.
+
+	We rely on this approach because it has already showed outperformance in protein quality assessment problen\cite{Baldassarre2020GRAPHQAPM}.
+
+	\section{Spherical convolution}
+	Consider a vertex $v_i$. Since all the amino acids in the protein are connected in a peptide chain, it is easy to
+	construct its local coordinate system for the amino acid $v_i$ under consideration — on two dihedral corners,
+	which are unambiguously determined from the geometry of the peptide chain. Write the coordinates of all the neighbors of $v_j \in \mathcal{N}(v_i)$
+	of the amino acid in the obtained coordinate system. Then proceed to spherical coordinates, and project all vertices onto a unit sphere
+	with the center in $v_i$. Now, each vertex $v_j \in \mathcal{N}(v_i)$ can be matched with a pair of angles $\Omega_i^j = (\phi_i^j, \psi_i^j)$ that specify the
+	angular position of the projection of the vertex $v_j$ onto a unit sphere in the local coordinate system of $v_i$.
+
+	Now, having an unambiguous orientation for each vertex of the graph, we can introduce the convolution operation. Let us consider a certain 
+	matrix function $f(\Omega) : [0, \pi] \times [0, 2\pi) \rightarrow \mathbb{R}^{d \times d'} $ on a single sphere. We can expance it
+	into a series on the basis of spherical functions $\{Y_l^m\}_{l,m}$ and leave the first few components:
+	$$
+		f(\Omega) \approx f_W(\Omega) = \sum_{l=0}^{L}\sum_m \boldsymbol{W}_l^m Y_l^m(\Omega),
+	$$
+	where $\boldsymbol{W}_l^m$ denotes coefficient matrix in the expancion of matrix function $f$ on the basis of $\{Y_l^m\}_{l,m}$. Then
+	we can introduce the spherical convolution operation for the vertex $v_i$ in the following way:
+	$$f_W \circ v_i = \sum_{v_j \in \mathcal{N}(v_i)} f_W(\Omega_i^j)x(v_i).$$
+
+	Considering $\boldsymbol{W}_l^m$ matrices to be optimized parameters, we will thus train spherical filters.
+
+	\subsection{Spherical convolution layer}
+	Let us have a 3D model of a protein consisting of $N$ amino acids, the $i$-th amino acid is described by the trait vector $\boldsymbol{x}_i \in \mathbb{R}^d$.
+	Let us denote all the vertices through the $\boldsymbol{X} \in \mathbb{R}^{N \times d}$ feature matrix. Then one layer of spherical
+	convolution is written down as follows:
+	$$
+		\boldsymbol{X} \longrightarrow \boldsymbol{X}' = \sigma(f_W \circ \boldsymbol{X}) = \sigma\left(\sum_{l,m}Y_l^m(\boldsymbol{A}_\Omega)\boldsymbol{X}\boldsymbol{W}_l^m\right),
+	$$
+	where $\sigma$ is an activation function, $Y_l^m$ are spherical functions, $\boldsymbol{W}_l^m$ are optimized parameters and $\boldsymbol{A}_\Omega$
+	is the adjacency matrix of graph $G$, which cells contains the spherical coordinates of the vertices in the corresponding local coordinate system:
+	$$
+		[\boldsymbol{A}_\Omega]_{i,j} = \begin{cases}
+			\Omega_i^j, & (v_i, v_j) \in E \\
+			0 & \text{otherwise}.
+		\end{cases}
+	$$
 	%\begin{State}
 	%    Мотивации и~интерпретации наиболее важны для понимания сути работы.
 	%\end{State}
