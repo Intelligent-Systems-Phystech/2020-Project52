@@ -1,5 +1,6 @@
 \documentclass[12pt,twoside]{article}
 \usepackage{jmlda}
+\English
 \title
 %    [Нелинейное ранжирование результатов разведочного информационного поиска] % Краткое название; не нужно, если полное название влезает в~колонтитул
 {Quality prediction of proteins models with spherical convolutions on three-dimensional graphs}
@@ -17,7 +18,14 @@
 \organization
 {$^1$ Moscow Institute of Physics and Technolgy, Moscow, Russia}%; $^2$Организация}
 \abstract
-{Convolutional neural networks have become very popular in recent years, and, in particular, have found widespread application in computer vision. Recently, active work has also begun on graph convolutional networks. In general, the graphs, unlike the pictures, are irregular structures, and in many tasks of learning on graphs sample objects also do not have unified topology. Therefore, the existing operations of convolution on the graphs are very much simplified, and the task of pulling on the graphs remain open in general. The purpose of this work is to research new operations of convolution on three-dimensional graphs within the framework of solving the problem of quality estimation of three-dimensional models of proteins (the problem of regression on the graph nodes).
+{Convolutional neural networks have become very popular in recent years, and, in particular, have found widespread application in computer
+vision. Recently, active work has also begun on graph convolutional networks. In general, the graphs, unlike the pictures, are irregular
+structures, and in many tasks of learning on graphs sample objects also do not have unified topology. Therefore, the existing operations
+of convolution on the graphs are very much simplified, and the task of pulling on the graphs remain open in general. The purpose of this
+work is to research new operations of convolution on three-dimensional graphs within the framework of solving the problem of quality
+estimation of three-dimensional models of proteins (the problem of regression on the graph nodes). These operations are theoretical mechaincs
+inspired methods based on the expancion of a function of spherical coordinates as a linear combination of spherical harmonics. It helps
+solve the problem of capturing some local 3D structure of protein residues.
 	
 	\bigskip
 	\textbf{Key words}: \emph {graph convolutional networks, spherical convlutions, three-dimensional graphs learning}.}
@@ -95,9 +103,39 @@
 	\end{cases}$.
 	Wheights matrix $\boldsymbol{W}^{(l)}$ are trained by stochastic gradient descend or its modifications.
 
-	We rely on this approach because it has already showed outperformance in protein quality assessment problen\cite{Baldassarre2020GRAPHQAPM}.
+	We rely on this approach because it has already showed outperformance in protein quality
+	 assessment problem\cite{Baldassarre2020GRAPHQAPM}.
+	
+	The main problem here is that classic GCN is not able to use information about locations of vertices in space. This is because the coordinates in space
+	are given ambiguously: the turned or shifted proteins are actually isomorphic. So our impovement is to capture such information from
+	sequential structure of a protein.
 
-	\section{Spherical convolution}
+	\section{Spherical Convolutional Networks}
+	\subsection{Spherical harmonics}
+	Let us consider a function $f(\Omega) : [0, \pi] \times [0, 2\pi) \rightarrow \mathbb{R}$ — mapping from unit sphere to real
+	numbers. Such function might be unknown or its evaluation might be time consuming. So, we want to expance this function as a linear
+	combination of simplier functions. The common approach that came from theoretical mechaincs is to use spherical harmonics\cite{Mueller1966}.
+	We will use the following form of spherical functions:
+	$$
+		Y_l^m(\phi, \psi) = \sqrt{\dfrac{(2l + 1)}{4\pi}\dfrac{(l-m)!}{(l+m)!}}P_l^m(\cos \phi)e^{im\psi}, 
+	$$
+	where $P_l^{m}$ are associated Legendre polynoms\cite{Mueller1966}.
+
+	On the unit sphere, any square-integrable function can thus be expanded as a linear combination of these:
+	$$
+	f(\phi, \psi) = \sum_{l = 0}^{\infty} \sum_{m=-l}^{m=l}f_l^m Y_l^m(\phi, \psi).
+	$$
+	We will use this fact to train a function of vertex features using the first few components of this expancion. 
+	Since the function is real, the real representation of spherical harmonics can be used:
+	$$
+	Y_{lm} = \begin{cases}
+		\sqrt{2}(-1)^m \Im\left[Y_l^{|m|}\right] & \text{if } m < 0 \\
+		Y_l^0 & m = 0 \\
+		\sqrt{2}(-1)^m \Re\left[Y_l^{m}\right] & \text{if } m > 0.
+	\end{cases}
+	$$
+
+	\subsection{Spherical convolution}
 	Consider a vertex $v_i$. Since all the amino acids in the protein are connected in a peptide chain, it is easy to
 	construct its local coordinate system for the amino acid $v_i$ under consideration — on two dihedral corners,
 	which are unambiguously determined from the geometry of the peptide chain. Write the coordinates of all the neighbors of $v_j \in \mathcal{N}(v_i)$
@@ -132,6 +170,15 @@
 			0 & \text{otherwise}.
 		\end{cases}
 	$$
+
+	\section{Experiment}
+	\subsection{Dataset}
+	All models are taken from the from CASP competition data (\url{http://predictioncenter.org}), which is dedicated to the prediction 
+	of the 3D structure of proteins by the amino acid sequence. We take data from CASP12 and CASP13 as a test sample, and data from
+	earlier CASPs as a training sample.
+
+	For each protein there is one real experimentally obtained 3D structure and many generated 3D structures. Our task is to predict 
+	the CAD-score \cite{Olechnovic2012} for each of the generated structures i.e. how similar each of the generated structures is to the real one.
 	%\begin{State}
 	%    Мотивации и~интерпретации наиболее важны для понимания сути работы.
 	%\end{State}
