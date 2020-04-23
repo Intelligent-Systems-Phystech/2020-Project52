@@ -1,6 +1,7 @@
 \documentclass[12pt,twoside]{article}
 \usepackage{jmlda}
 \English
+\selectlanguage{english}\useshorthands{"}
 \title
 %    [Нелинейное ранжирование результатов разведочного информационного поиска] % Краткое название; не нужно, если полное название влезает в~колонтитул
 {Quality prediction of proteins models with spherical convolutions on three-dimensional graphs}
@@ -179,6 +180,48 @@ solve the problem of capturing some local 3D structure of protein residues.
 
 	For each protein there is one real experimentally obtained 3D structure and many generated 3D structures. Our task is to predict 
 	the CAD-score \cite{Olechnovic2012} for each of the generated structures i.e. how similar each of the generated structures is to the real one.
+	Graphs are generated using Voronoi diagrams with weights — area of contact.
+
+	\subsection{Metrics}
+	In this task there is a problem of selecting the right quality metric. It was found that MSE's conventional metric used
+	for training were not suitable for the evaluating the quality of the algorithm. This is due to the fact that it does not 
+	reflect what the algorithm was created for at all — to select protein folding models. So, we need more suitable metric.
+	Often Pearson correlation between CAD models or residues and algorithm predictions is chosen for this purpose\cite{Baldassarre2020GRAPHQAPM}.
+	We will also use \textbf{z-score} metric because it represts how good is the model with the
+	maximum predicted score.
+
+	We will calculate these metrics for every protein, and then average them. As the result, we will get the global metric value.
+
+	\subsection{Baseline}
+	For the baseline we will use an architecture inspired by GraphQA\cite{Baldassarre2020GRAPHQAPM} network. Firstly, we encode residues features
+	to high-dimensional space using linear layers with a size increasing by a power of two. For the next step we process obtained features through
+	8 graph convolutional layers to account for the relationships of residues. Finally, we pass the result through a multi-layer perceptron and get
+	single output with sigmoid activation function as the CAD score is from 0 to 1. We have chosen ELU as an activation function for hidden layers.
+	Adam optimizer\cite{Kingma2014} is used for training with learning rate set to $0.001$.
+
+	This model was trained on CASP8, CASP9, CASP10, CASP11 datasets for 50 iterations and evaluated on CASP12. We decided to train
+	it on CPU because the slowest part of training was the loading features and adjacency matrices from HDD.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{img/z_score_casp12.pdf}
+		\caption{z-score and Pearson correlation coeffient for each iteration on CASP12 dataset.}
+		\label{fig:mesh1}
+	\end{figure}
+
+	We managed to achieve the maximum Pearson correlation value of $0.57$ and maximum z-score value of $0.979$. It is significantly lower
+	that many of state-of-the-art algorithms\cite{Baldassarre2020GRAPHQAPM} but it can be explained by the fact that we only used geometric structure of proteins.
+	All the high results were obtained only with the use of complex features that represent chemical relations between residues and some
+	biological features that represent protein evalution\cite{Baldassarre2020GRAPHQAPM}.
+
+	\section{Conclusion}
+	For the first time we applied spherical convolutions for capturing the 3D sctructure of graph. The results shown that it could
+	give a significant imporvement of the quality of the algorithm. This idea can be combinated with other ideas introduced in other papers
+	\cite{Pages2019}\cite{Baldassarre2020GRAPHQAPM}\cite{Uziela2016} so we hope that it can achieve even higher results in the problem
+	of Protein Quality Assessment. We want to notiece that the idea of spherical convlutions is universal and can be applied to
+	various types of tasks of learning on graphs with 3D structure and hope that it will find such applications.
+
+	Finally, we wish that this idea will be developed and be applied in more complicated approaches of learning on graphs such as
+	graph variational autoencoders\cite{Kipf2016a} and Quality Assessment will become a popular task in machine learning community.
 	%\begin{State}
 	%    Мотивации и~интерпретации наиболее важны для понимания сути работы.
 	%\end{State}
