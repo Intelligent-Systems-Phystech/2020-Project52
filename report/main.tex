@@ -1,4 +1,5 @@
 \documentclass[12pt,twoside]{article}
+\usepackage{booktabs}
 \usepackage{jmlda}
 \English
 \selectlanguage{english}\useshorthands{"}
@@ -182,6 +183,10 @@ solve the problem of capturing some local 3D structure of protein residues.
 	the CAD-score \cite{Olechnovic2012} for each of the generated structures i.e. how similar each of the generated structures is to the real one.
 	Graphs are generated using Voronoi diagrams with weights — area of contact.
 
+	We have precalculated spherical harmonic of the order of $5$ for every pair of incident residues. This took 60GB of HDD space when
+	calculated on CASP8-CASP12. So, this appears to be the main problem there, comparing to the fact that raw data tooks only
+	15GB and that value grows as $n^2$, where $n$ is an order of spherical harmonic.
+
 	\subsection{Metrics}
 	In this task there is a problem of selecting the right quality metric. It was found that MSE's conventional metric used
 	for training were not suitable for the evaluating the quality of the algorithm. This is due to the fact that it does not 
@@ -212,6 +217,37 @@ solve the problem of capturing some local 3D structure of protein residues.
 	that many of state-of-the-art algorithms\cite{Baldassarre2020GRAPHQAPM} but it can be explained by the fact that we only used geometric structure of proteins.
 	All the high results were obtained only with the use of complex features that represent chemical relations between residues and some
 	biological features that represent protein evalution\cite{Baldassarre2020GRAPHQAPM}.
+
+	\subsection{Spherical Convolutional Networks}
+	We have ran the same architecture with spherical convolutional layers instead of GCN. The main problem there was the fact, that
+	the number of tained parameters has increased in $25$ times because we have used spherical harmonics of the order of $5$. So, we
+	have increased learning rate and started learning on GPU because the loading from HDD now is not a bottle neck.
+
+	\subsection{Comparsion}
+	Table 1 the performance of the state-of-the-art methods of Protein Quality Assessment. The important remark there is
+	the fact that other approaches shown in this table use biological and chemical features but in turn we use only geometric representation
+	of residues graph. Despite that fact Spherical Convolutional Network has shown high performance.
+	\begin{center}
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{l|l|l|l|l}
+					   & $\rho$ & $r$ & $\tau$ & z-score \\ \hline
+			ProQ3D     & 0.806  &     &        &         \\
+			ProQ4      &        &     &        &         \\
+			VoroMQN    & 0.605  &     &        &         \\
+			Rwplus     & -0.096 &     &        &         \\
+			AngularQA  &        &     &        &         \\
+			3D CNN     &        &     &        &         \\
+			Ornate     & 0.670  &     &        &         \\
+			Simple GCN & 0.55   &     &        & 0.97    \\
+			SCN        &        &     &        &        
+		\end{tabular}
+		\caption{Comparsion of Pearson, Spearman and Kendell correlation coefficients and z-score of the state-of-the-art algorithms,
+			our GCN baseline and Spherical Convolutional Network on CASP12 dataset.
+			}
+		\label{Tab:1}
+		\end{table}
+	\end{center}
 
 	\section{Conclusion}
 	For the first time we applied spherical convolutions for capturing the 3D sctructure of graph. The results shown that it could
