@@ -8,7 +8,7 @@
 {Quality prediction of proteins models with spherical convolutions on three-dimensional graphs}
 \author
 %    [Мамонов~К.\,Р.] % список авторов для колонтитула; не нужен, если основной список влезает в колонтитул
-{Nikita Pavlichenko, Sergei Grudinin, Ilia Igashov.} % основной список авторов, выводимый в оглавление
+{Nikita Pavlichenko$^1$, Sergei Grudinin$^2$, Ilia Igashov$^{1,2}$.} % основной список авторов, выводимый в оглавление
 %[Мамонов~К.\,Р.$^1$, Воронцов~К.\,В.$^1$, Еремеев~М.\,А.$^1$] % список авторов, выводимый в заголовок; не нужен, если он не отличается от основного
 %\thanks
 %    {Работа выполнена при финансовой поддержке РФФИ, проект \No\,00-00-00000.
@@ -16,9 +16,11 @@
 %{Задачу поставил:  Воронцов~К.\,В.
 %	 Консультант:  Еремеев~М.\,А.}
 \email
-{pavlichenko.nv@phystech.ru, sergei.grudinin@inria.fr, igashov.i@yandex.ru}
+{pavlichenko.nv@phystech.edu, sergei.grudinin@inria.fr, igashov.i@yandex.ru}
 \organization
-{$^1$ Moscow Institute of Physics and Technolgy, Moscow, Russia}%; $^2$Организация}
+{$^1$ Moscow Institute of Physics and Technology, 141701 Dolgoprudniy, Russia;
+
+$^2$ Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK, 38000 Grenoble, France}%; $^2$Организация}
 \abstract
 {Convolutional neural networks have become very popular in recent years, and, in particular, have found widespread application in computer
 vision. Recently, active work has also begun on graph convolutional networks. In general, the graphs, unlike the pictures, are irregular
@@ -184,7 +186,7 @@ solve the problem of capturing some local 3D structure of protein residues.
 	Graphs are generated using Voronoi diagrams with weights — area of contact.
 
 	We have precalculated spherical harmonic of the order of $5$ for every pair of incident residues. This took 60GB of HDD space when
-	calculated on CASP8-CASP12. So, this appears to be the main problem there, comparing to the fact that raw data tooks only
+	calculated on CASP8-CASP12. So, it appears to be the main problem there, comparing to the fact that raw data tooks only
 	15GB and that value grows as $n^2$, where $n$ is an order of spherical harmonic.
 
 	\subsection{Metrics}
@@ -209,7 +211,8 @@ solve the problem of capturing some local 3D structure of protein residues.
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=1.0\textwidth]{img/z_score_casp12.pdf}
-		\caption{z-score and Pearson correlation coeffient for each iteration on CASP12 dataset.}
+		\caption{z-score and Pearson and Spearman correlation coeffients for each iteration on CASP12 dataset of baseline 
+		GCN.}
 		\label{fig:mesh1}
 	\end{figure}
 
@@ -222,27 +225,31 @@ solve the problem of capturing some local 3D structure of protein residues.
 	We have ran the same architecture with spherical convolutional layers instead of GCN. The main problem there was the fact, that
 	the number of tained parameters has increased in $25$ times because we have used spherical harmonics of the order of $5$. So, we
 	have increased learning rate and started learning on GPU because the loading from HDD now is not a bottle neck.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{img/z_score_casp12_sh.pdf}
+		\caption{z-score and Pearson and Spearman correlation coeffients for each iteration on CASP12 dataset of SCN.}
+		\label{fig:mesh1}
+	\end{figure}
 
 	\subsection{Comparsion}
 	Table 1 the performance of the state-of-the-art methods of Protein Quality Assessment. The important remark there is
 	the fact that other approaches shown in this table use biological and chemical features but in turn we use only geometric representation
 	of residues graph. Despite that fact Spherical Convolutional Network has shown high performance.
 	\begin{center}
-		\begin{table}[h]
+		\begin{table}[H]
 			\centering
 			\begin{tabular}{l|l|l|l|l}
-					   & $\rho$ & $r$ & $\tau$ & z-score \\ \hline
-			ProQ3D     & 0.806  &     &        &         \\
-			ProQ4      &        &     &        &         \\
-			VoroMQN    & 0.605  &     &        &         \\
-			Rwplus     & -0.096 &     &        &         \\
-			AngularQA  &        &     &        &         \\
-			3D CNN     &        &     &        &         \\
-			Ornate     & 0.670  &     &        &         \\
-			Simple GCN & 0.55   &     &        & 0.97    \\
-			SCN        &        &     &        &        
+				\hline
+					   & $\rho$ &  $r$     &   rank       & z-score \\ \hline
+			ProQ3D     & 0.801  &  0.750   &   11.961     & 1.670       \\
+			VoroMQA    & 0.803  &  0.766   &   17.171     & 1.410       \\  
+			SBROD      & 0.685  &  0.762   &   23.579     & 1.282       \\
+			Ornate     & 0.828  &  0.781   &   10.776     & 1.780       \\
+			Simple GCN & 0.570  &  0.510   &   31.667     & 0.979       \\
+			SCN        & 0.711  &  0.637   &   21.718     & 1.300       
 		\end{tabular}
-		\caption{Comparsion of Pearson, Spearman and Kendell correlation coefficients and z-score of the state-of-the-art algorithms,
+		\caption{Comparsion of Pearson, Spearman correlation coefficients and z-score and rank of the state-of-the-art algorithms,
 			our GCN baseline and Spherical Convolutional Network on CASP12 dataset.
 			}
 		\label{Tab:1}
