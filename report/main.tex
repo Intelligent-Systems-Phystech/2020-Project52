@@ -247,7 +247,7 @@ solve the problem of capturing some local 3D structure of protein residues.
 			SBROD      & 0.685  &  0.762   &   23.579     & 1.282       \\
 			Ornate     & 0.828  &  0.781   &   10.776     & 1.780       \\
 			Simple GCN & 0.570  &  0.510   &   31.667     & 0.979       \\
-			SCN        & 0.711  &  0.637   &   21.718     & 1.300       
+			SCN        & 0.767  &  0.700   &   18.462     & 1.411       
 		\end{tabular}
 		\caption{Comparsion of Pearson, Spearman correlation coefficients and z-score and rank of the state-of-the-art algorithms,
 			our GCN baseline and Spherical Convolutional Network on CASP12 dataset.
@@ -255,6 +255,9 @@ solve the problem of capturing some local 3D structure of protein residues.
 		\label{Tab:1}
 		\end{table}
 	\end{center}
+
+	We see that Spherical Convolutional Network has show significantly better performance than GCN. It show that out approach
+	is applyble and apperars to be an imporvement to Graph Convolutional Networks.
 
 	\section{Conclusion}
 	For the first time we applied spherical convolutions for capturing the 3D sctructure of graph. The results shown that it could
